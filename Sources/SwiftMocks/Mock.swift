@@ -1,44 +1,54 @@
-/// A macro that generates a mock for a given type.
-/// It creates a constant `mock` of the given type that can be used to record calls and mock method calls.
-///
-/// Example:
-/// ```swift
-/// @Mock class MyClass {
-///     var priority: Int { mock.priority.getter.record() }
-///     func doSomething() { mock.doSomething() }
-///     func perform(with param: Int) -> String {
-///         mock.perform(with: param)
-///     }
-/// }
-/// ```
-///
-/// The generated code by the macro will look like this:
-///
-/// ```swift
-/// class MyClass {
-///     struct MyClassMock {
-///         var priority: MockVariable<Int> = .init()
-///         var doSomethingCalls: Mock<Void, Void> = .init()
-///         var performCalls: Mock<Int, String> = .init()
-///     }
-///     var mock: MyClassMock = .init()
-/// }
-/// ```
-///
-/// The generated code can be used like this:
-///
-/// ```swift
-/// let myClass = MyClass()
-/// myClass.mock.priority.getter.mockCall { 1 }
-/// print(myClass.priority) // prints `1`
-/// myClass.doSomething()
-/// print(myClass.mock.doSomethingCalls.callsCount == 1) // prints `true`
-/// myClass.mock.performCalls.mockCall { param in "mocked => \(param)" }
-/// print(myClass.perform(with: 1)) // prints `mocked => 1`
-/// ```
-///
-@attached(member, names: arbitrary)
-public macro Mock() = #externalMacro(
-    module: "SwiftMocksMacros",
-    type: "SwiftMocksMacro"
-)
+//
+//  File.swift
+//
+//
+//  Created by Lazar Otasevic on 25.12.23..
+//
+
+import Foundation
+
+public struct MockNormal<ArgumentType, ReturnType> {
+    public init() {}
+    public var block: ((ArgumentType) -> ReturnType)!
+    public var callsHistory: [ArgumentType] = []
+    public mutating func record(_ arguments: ArgumentType) -> ReturnType {
+        callsHistory.append(arguments)
+        return block(arguments)
+    }
+}
+
+public struct MockThrowing<ArgumentType, ReturnType> {
+    public init() {}
+    public var block: ((ArgumentType) throws -> ReturnType)!
+    public var callsHistory: [ArgumentType] = []
+    public mutating func record(_ arguments: ArgumentType) throws -> ReturnType {
+        callsHistory.append(arguments)
+        return try block(arguments)
+    }
+}
+
+public struct MockAsyncThrowing<ArgumentType, ReturnType> {
+    public init() {}
+    public var block: ((ArgumentType) async throws -> ReturnType)!
+    public var callsHistory: [ArgumentType] = []
+    public mutating func record(_ arguments: ArgumentType) async throws -> ReturnType {
+        callsHistory.append(arguments)
+        return try await block(arguments)
+    }
+}
+
+public struct MockAsync<ArgumentType, ReturnType> {
+    public init() {}
+    public var block: ((ArgumentType) async -> ReturnType)!
+    public var callsHistory: [ArgumentType] = []
+    public mutating func record(_ arguments: ArgumentType) async -> ReturnType {
+        callsHistory.append(arguments)
+        return await block(arguments)
+    }
+}
+
+public struct MockVariable<VarType> {
+    public init() {}
+    public var setter: MockNormal<VarType, Void> = .init()
+    public var getter: MockNormal<Void, VarType> = .init()
+}

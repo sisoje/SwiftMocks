@@ -12,19 +12,21 @@ final class MockTests: XCTestCase {
     func testMacro() {
         assertMacroExpansion(
             """
+            class MyClass {}
             @Mock
-            class MyClass {
+            extension MyClass {
                 func doAction() {}
             }
             """,
             expandedSource: """
-            class MyClass {
+            class MyClass {}
+            extension MyClass {
                 func doAction() {}
             
-                let mock = MyClassMock()
-            
+                static let mock = MyClassMock()
+
                 class MyClassMock {
-                     var doActionCalls = Mock<(Void), Void>()
+                     var doActionCalls = MockNormal<(Void), Void>()
                         func doAction() {
                         doActionCalls.record(())
                     }

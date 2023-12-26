@@ -1,13 +1,13 @@
 import SwiftSyntax
 
 struct MockedVariableDeclFactory {
-    func make(typeName: TokenSyntax, from classDecl: ClassDeclSyntax) -> VariableDeclSyntax {
+    func make(protocolName: TokenSyntax, typeName: TokenSyntax, from classDecl: ExtensionDeclSyntax) -> VariableDeclSyntax {
         return VariableDeclSyntax(
-            bindingSpecifier: .keyword(.let),
+            bindingSpecifier: "static let",
             bindings: PatternBindingListSyntax(
                 arrayLiteral:
                 PatternBindingSyntax(
-                    pattern: PatternSyntax(stringLiteral: "mock"),
+                    pattern: PatternSyntax(stringLiteral: "mocked\(protocolName)"),
                     initializer: InitializerClauseSyntax(value: ExprSyntax(stringLiteral: "\(typeName)()"))
                 )
             )
