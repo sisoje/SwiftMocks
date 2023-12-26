@@ -11,16 +11,16 @@ struct MockVariableDeclarationFactory {
 
     @MemberBlockItemListBuilder
     func mockVariableDeclaration(_ variable: VariableDeclSyntax) -> MemberBlockItemListSyntax {
-        if let binding = variable.bindings.first, let type = binding.typeAnnotation?.type.description {
+        if let binding = variable.bindings.first, let type = binding.typeAnnotation?.type.trimmedDescription {
             
-            let pat: PatternSyntax = "\(raw: binding.pattern)Vars"
+            let pat: PatternSyntax = "\(raw: binding.pattern.trimmedDescription)Mock"
             VariableDeclSyntax(
                 bindingSpecifier: .keyword(.var),
                 bindings: .init(
                     arrayLiteral: PatternBindingSyntax(
                         pattern: pat,
-                        typeAnnotation: TypeAnnotationSyntax(type: TypeSyntax(stringLiteral: "MockVariable<\(type)>")),
-                        initializer: InitializerClauseSyntax(value: ExprSyntax(stringLiteral: ".init()"))
+                        //typeAnnotation: TypeAnnotationSyntax(type: TypeSyntax(stringLiteral: "MockVariable<\(type)>")),
+                        initializer: InitializerClauseSyntax(value: ExprSyntax(stringLiteral: "MockVariable<\(type)>()"))
                     )
                 )
             )
@@ -43,7 +43,7 @@ struct MockVariableDeclarationFactory {
                     arrayLiteral: PatternBindingSyntax(
                         pattern: binding.pattern,
                         typeAnnotation: TypeAnnotationSyntax(type: TypeSyntax(stringLiteral: type)),
-                        initializer: InitializerClauseSyntax(equal: "", value: ExprSyntax(stringLiteral: "{ get { \( binding.pattern)Vars.getter.record(()) } set { \( binding.pattern)Vars.setter.record((newValue)) }  }"))
+                        initializer: InitializerClauseSyntax(equal: "", value: ExprSyntax(stringLiteral: "{ get { \( binding.pattern)Mock.getter.record() } set { \( binding.pattern)Mock.setter.record(newValue) }  }"))
                     )
                 )
             )

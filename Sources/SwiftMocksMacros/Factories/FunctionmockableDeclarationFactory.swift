@@ -10,15 +10,17 @@ struct FunctionMockableDeclarationFactory {
                 .map { type in
                     GenericParameterSyntax(name: TokenSyntax(stringLiteral: type.description))
                 }
-            let returnType = function.signature.returnClause?.type.description ?? "Void"
+            let returnType = function.signature.returnClause?.type.trimmedDescription ?? "Void"
             
-            let voidOne = GenericParameterSyntax(name: TokenSyntax(stringLiteral: "Void"))
+            let pa = if params.count <= 1 {
+                params.first?.trimmedDescription ?? "Void"
+            } else {
+                "(" + GenericParameterListSyntax(params).map { p in
+                    p.trimmedDescription
+                }.joined(separator: ", ") + ")"
+            }
             
-            let pa = GenericParameterListSyntax(params.count == 0 ? [voidOne] : params).map { p in
-                p.description
-            }.joined(separator: ", ")
-            
-            let structName = if isAsyncThrowsFuction(function) {
+            let structName1 = if isAsyncThrowsFuction(function) {
                 "MockAsyncThrowing"
             } else if isThrowingFuction(function) {
                 "MockThrowing"
@@ -27,11 +29,14 @@ struct FunctionMockableDeclarationFactory {
             } else {
                 "MockNormal"
             }
+            
+            let structName = structName1 + (params.isEmpty ? "Void" : "")
+            let templateParams = params.isEmpty ? returnType : "\(pa), \(returnType)"
 
             VariableDeclSyntax(
                 modifiers: DeclModifierListSyntax([.init(name: .identifier(""))]),
                 .var,
-                name: PatternSyntax(stringLiteral: function.name.text + "Calls = \(structName)<(\(pa)), \(returnType)>()")
+                name: PatternSyntax(stringLiteral: function.name.text + "Mock = \(structName)<\(templateParams)>()")
             )
         }
     }
@@ -63,7 +68,11 @@ struct FunctionMockableDeclarationFactory {
                 signature: function.signature,
                 genericWhereClause: function.genericWhereClause
             ) {
-                CodeBlockItemSyntax(stringLiteral: tryStringLiteral + function.name.text + "Calls." + "record((\(paramsValues.joined(separator: ", "))))")
+                if paramsValues.isEmpty {
+                    CodeBlockItemSyntax(stringLiteral: tryStringLiteral + function.name.text + "Mock." + "record()")
+                } else {
+                    CodeBlockItemSyntax(stringLiteral: tryStringLiteral + function.name.text + "Mock." + "record((\(paramsValues.joined(separator: ", "))))")
+                }
             }
         }
     }

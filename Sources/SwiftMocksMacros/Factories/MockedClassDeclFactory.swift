@@ -1,9 +1,10 @@
 import SwiftSyntax
 
 struct MockedClassDeclFactory {
-    func make(protocolName: TokenSyntax, typeName: TokenSyntax, from classDecl: ExtensionDeclSyntax) -> ClassDeclSyntax {
+    func make(protocolName: TokenSyntax, from classDecl: ExtensionDeclSyntax) -> ClassDeclSyntax {
         ClassDeclSyntax(
-            name: .init(stringLiteral: "\(typeName.text): \(protocolName.text)"),
+            leadingTrivia: .init(stringLiteral: "final "),
+            name: .init(stringLiteral: "\(protocolName.text)Mocked: \(protocolName.text)"),
             memberBlockBuilder: {
                 let variables = classDecl.memberBlock.members
                     .compactMap { $0.decl.as(VariableDeclSyntax.self) }

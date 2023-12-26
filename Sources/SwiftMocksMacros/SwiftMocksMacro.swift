@@ -7,18 +7,16 @@ public struct SwiftMocksMacro: MemberMacro, PeerMacro {
         guard let protocolName = classDecl.inheritanceClause?.inheritedTypes.trimmedDescription else { return [] }
         return [
             DeclSyntax(MockedClassDeclFactory().makeProto(protocname: .identifier(protocolName), from: classDecl)),
-            //DeclSyntax(MockedClassDeclFactory().makeProtoExt(protocname: .identifier(protocolName), from: classDecl)),
+            // DeclSyntax(MockedClassDeclFactory().makeProtoExt(protocname: .identifier(protocolName), from: classDecl)),
         ]
     }
-    
+
     public static func expansion(of node: AttributeSyntax, providingMembersOf declaration: some DeclGroupSyntax, in context: some MacroExpansionContext) throws -> [DeclSyntax] {
         guard let classDecl = declaration.as(ExtensionDeclSyntax.self) else { return [] }
         guard let protocolName = classDecl.inheritanceClause?.inheritedTypes.trimmedDescription else { return [] }
-        let mockClassName = TokenSyntax.identifier(protocolName.description + "Mocked")
         return [
-            DeclSyntax(MockedVariableDeclFactory().make(protocolName: .identifier(protocolName), typeName: mockClassName, from: classDecl)),
-            DeclSyntax(MockedClassDeclFactory().make(protocolName: .identifier(protocolName), typeName: mockClassName, from: classDecl)),
-            
+            // DeclSyntax(MockedVariableDeclFactory().make(protocolName: .identifier(protocolName), typeName: mockClassName, from: classDecl)),
+            DeclSyntax(MockedClassDeclFactory().make(protocolName: .identifier(protocolName), from: classDecl)),
         ]
     }
 }

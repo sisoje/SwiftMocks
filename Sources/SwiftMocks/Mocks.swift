@@ -17,6 +17,16 @@ public struct MockNormal<ArgumentType, ReturnType> {
     }
 }
 
+public struct MockNormalVoid<ReturnType> {
+    public init() {}
+    public var block: (() -> ReturnType)!
+    public var numberOfCalls = 0
+    public mutating func record() -> ReturnType {
+        numberOfCalls += 1
+        return block()
+    }
+}
+
 public struct MockThrowing<ArgumentType, ReturnType> {
     public init() {}
     public var block: ((ArgumentType) throws -> ReturnType)!
@@ -24,6 +34,16 @@ public struct MockThrowing<ArgumentType, ReturnType> {
     public mutating func record(_ arguments: ArgumentType) throws -> ReturnType {
         callsHistory.append(arguments)
         return try block(arguments)
+    }
+}
+
+public struct MockThrowingVoid<ReturnType> {
+    public init() {}
+    public var block: (() throws -> ReturnType)!
+    public var numberOfCalls = 0
+    public mutating func record() throws -> ReturnType {
+        numberOfCalls += 1
+        return try block()
     }
 }
 
@@ -37,6 +57,16 @@ public struct MockAsyncThrowing<ArgumentType, ReturnType> {
     }
 }
 
+public struct MockAsyncThrowingVoid<ReturnType> {
+    public init() {}
+    public var block: (() async throws -> ReturnType)!
+    public var numberOfCalls = 0
+    public mutating func record() async throws -> ReturnType {
+        numberOfCalls += 1
+        return try await block()
+    }
+}
+
 public struct MockAsync<ArgumentType, ReturnType> {
     public init() {}
     public var block: ((ArgumentType) async -> ReturnType)!
@@ -47,8 +77,18 @@ public struct MockAsync<ArgumentType, ReturnType> {
     }
 }
 
+public struct MockAsyncVoid<ReturnType> {
+    public init() {}
+    public var block: (() async -> ReturnType)!
+    public var numberOfCalls = 0
+    public mutating func record() async -> ReturnType {
+        numberOfCalls += 1
+        return await block()
+    }
+}
+
 public struct MockVariable<VarType> {
     public init() {}
-    public var setter: MockNormal<VarType, Void> = .init()
-    public var getter: MockNormal<Void, VarType> = .init()
+    public var setter = MockNormal<VarType, Void>()
+    public var getter = MockNormalVoid<VarType>()
 }
